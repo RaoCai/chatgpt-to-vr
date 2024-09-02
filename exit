@@ -1,0 +1,38 @@
+[33mcommit 67d5030706c176b33bf86311d916b21984c94bd1[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: pvlata75 <111495956+pvlata75@users.noreply.github.com>
+Date:   Mon Sep 2 14:06:43 2024 +0930
+
+    Added keyboard test example
+    
+    Added keyboard
+    And board to test
+
+[33mcommit b2903e7a2718a0d87f28d4aca20de004fc551917[m
+Author: pvlata75 <111495956+pvlata75@users.noreply.github.com>
+Date:   Mon Sep 2 13:34:45 2024 +0930
+
+    Deleted unnecessary things
+    
+    Deleted unnecessary things
+
+[33mcommit bd628c96d50dd33db430265e8d0827f79cef63b7[m
+Author: pvlata75 <111495956+pvlata75@users.noreply.github.com>
+Date:   Mon Sep 2 13:34:00 2024 +0930
+
+    Updated
+
+[33mcommit 9922941cffa9c558d4e752a4e6365bba6b22fbdf[m
+Author: pvlata75 <111495956+pvlata75@users.noreply.github.com>
+Date:   Mon Sep 2 13:30:21 2024 +0930
+
+    Update Main Scenes.unity
+    
+    Modified controller turn, movement
+
+[33mcommit 9556cf879e82e976c313552f6a9d68b297f9f61f[m
+Author: pvlata75 <111495956+pvlata75@users.noreply.github.com>
+Date:   Mon Sep 2 13:04:57 2024 +0930
+
+    Create scence, added hands
+    
+    Added XR interaction hands setup into the scene

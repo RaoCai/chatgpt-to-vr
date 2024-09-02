@@ -238,7 +238,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5019471fb2174e5c852ecd4047163007, type: 3}
   m_Name: HandInteractionProfile Android
   m_EditorClassIdentifier: 
-  m_enabled: 0
+  m_enabled: 1
   nameUi: Hand Interaction Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.handinteraction
@@ -370,8 +370,6 @@ MonoBehaviour:
   - {fileID: 5774975658434097379}
   - {fileID: 6416640499851233021}
   - {fileID: -6346926112745301231}
-  - {fileID: -5509386658476554080}
-  - {fileID: -8105411115202791032}
   - {fileID: -3338482473520404313}
   - {fileID: 327036491906221279}
   - {fileID: -1044145735861076385}
@@ -555,7 +553,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5019471fb2174e5c852ecd4047163007, type: 3}
   m_Name: HandInteractionProfile Standalone
   m_EditorClassIdentifier: 
-  m_enabled: 0
+  m_enabled: 1
   nameUi: Hand Interaction Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.handinteraction
@@ -700,8 +698,6 @@ MonoBehaviour:
   - {fileID: 8010440593532107872}
   - {fileID: -7630256045046064131}
   - {fileID: 6579915674206245637}
-  - {fileID: -9057503660328474491}
-  - {fileID: 7781147202747361039}
   - {fileID: 6537466184529298746}
   - {fileID: 2280275728902157699}
   - {fileID: 6029320329690801508}
@@ -847,7 +843,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c4b862ee14fb479fbfe5fffe655d3ed3, type: 3}
   m_Name: MetaQuestTouchProControllerProfile Android
   m_EditorClassIdentifier: 
-  m_enabled: 0
+  m_enabled: 1
   nameUi: Meta Quest Touch Pro Controller Profile
   version: 0.0.1
   featureIdInternal: com.unity.openxr.feature.input.metaquestpro

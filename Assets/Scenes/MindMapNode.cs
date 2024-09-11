@@ -1,25 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 
 public class MindMapNode : MonoBehaviour
 {
-    public GameObject nodePrefab;
-    public LineRenderer lineRenderer;
-    public List<MindMapNode> childNodes = new List<MindMapNode>();
+    public string content;
+    public List<MindMapNode> children;
+    public Vector3 position;
 
-    public void CreateNode(Vector3 position)
+    public MindMapNode(string content)
     {
-        GameObject newNode = Instantiate(nodePrefab, position, Quanternion.identity);
-        newNode.transform.SetParent(this.transform); 
-        childNodes.Add(newNode.GetComponent<MindMapNode>());
-        DrawConnection(newNode.transform.position);
+        this.content = content;
+        this.children = new List<MindMapNode>();
+        this.position = Vector3.zero;
     }
 
-    public void DrawConnection(Vector3 targetPosition)
+    public void AddChild(MindMapNode child)
     {
-        lineRenderer.positionCount = 2;
-        lineRenderer.SetPosition(0, transform.position);
-        lineRenderer.SetPosition(1, targetPosition);
+        children.Add(child);
     }
 }

@@ -12,7 +12,6 @@ GameObject:
   - component: {fileID: 33019469920901372}
   - component: {fileID: 23659821880543676}
   - component: {fileID: 114952813105359896}
-  - component: {fileID: 114820971152666198}
   m_Layer: 0
   m_Name: ProceduralTree
   m_TagString: Untagged
@@ -110,18 +109,6 @@ MonoBehaviour:
     heightSegments: 10
     radialSegments: 8
     bendDegree: 0.2
-  generations: 4
+  generations: 5
   length: 1.25
   radius: 0.18
---- !u!114 &114820971152666198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1856826850138188}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fade3408622cc489389f11fa87ef789f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

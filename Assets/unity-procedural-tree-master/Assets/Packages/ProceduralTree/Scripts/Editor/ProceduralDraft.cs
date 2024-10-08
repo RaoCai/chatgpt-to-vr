@@ -3,35 +3,46 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+
+using UnityEngine;
 
 namespace ProceduralModeling
 {
 
-    public class ProceduralTree : ProceduralModelingBase
+    public class ProceduralTree : XRGrabInteractable
     {
-
         public TreeData Data { get { return data; } }
 
         [SerializeField] TreeData data;
         [SerializeField, Range(2, 8)] protected int generations = 5;
         [SerializeField, Range(0.5f, 5f)] protected float length = 1f;
         [SerializeField, Range(0.1f, 2f)] protected float radius = 0.15f;
+
+        [SerializeField] private GameObject branchPrefab;
         private List<InteractiveBranch> interactiveBranches = new List<InteractiveBranch>();
 
         const float PI2 = Mathf.PI * 2f;
+
+        protected override void Awake()
+        {
+            base.Awake();
+            CreateMesh();
+            CreateInteractiveBranches();
+        }
+
+        private void CreateMesh()
+        {
+            Mesh mesh = Build();
+            GetComponent<MeshFilter>().mesh = mesh;
+            GetComponent<MeshCollider>().sharedMesh = mesh;
+        }
 
         public static Mesh Build(TreeData data, int generations, float length, float radius)
         {
             data.Setup();
 
-            var root = new TreeBranch(
-                generations,
-                length,
-                radius,
-                data
-            );
+            var root = new TreeBranch(generations, length, radius, data);
 
             var vertices = new List<Vector3>();
             var normals = new List<Vector3>();
@@ -57,7 +68,6 @@ namespace ProceduralModeling
                     var B = segment.Frame.Binormal;
                     for (int j = 0; j <= data.radialSegments; j++)
                     {
-                        // 0.0 ~ 2π
                         var u = 1f * j / data.radialSegments;
                         float rad = u * PI2;
 
@@ -102,7 +112,7 @@ namespace ProceduralModeling
             return mesh;
         }
 
-        protected override Mesh Build()
+        protected virtual Mesh Build()
         {
             return Build(data, generations, length, radius);
         }
@@ -127,96 +137,58 @@ namespace ProceduralModeling
             action(from);
         }
 
-        public void DeleteBranch(InteractiveBranch branch)
+        public void RegenerateMesh()
         {
-            interactiveBranches.Remove(branch);
-            Destroy(branch.gameObject);
-
-            // Update tree structure
-            TreeBranch parentBranch = branch.TreeBranch;
-            if (parentBranch != null)
-            {
-                parentBranch.Children.Remove(branch.TreeBranch);
-            }
-
-            Mesh updatedMesh = Build();
-            GetComponent<MeshFilter>().mesh = updatedMesh;
-            GetComponent<MeshCollider>().sharedMesh = updatedMesh;
-
-            // Recreate interactive branches
-            CreateInteractiveBranches();
+            data.Setup();
+            CreateMesh();
         }
 
         private void CreateInteractiveBranches()
         {
-            // Clear existing branches
             foreach (var branch in interactiveBranches)
             {
                 Destroy(branch.gameObject);
             }
             interactiveBranches.Clear();
 
-            // Create the root branch
-            var root = new TreeBranch(generations, length, radius, data);
+            TreeBranch root = new TreeBranch(generations, length, radius, data);
 
-            // Traverse the tree and create interactive branches
             Traverse(root, (branch) =>
             {
-                var branchObject = new GameObject($"Branch_{interactiveBranches.Count}");
-                branchObject.transform.SetParent(transform);
-                branchObject.transform.position = branch.To;
-
-                var interactiveBranch = branchObject.AddComponent<InteractiveBranch>();
+                var branchObject = Instantiate(branchPrefab, branch.To, Quaternion.identity, transform);
+                var interactiveBranch = branchObject.GetComponent<InteractiveBranch>();
                 interactiveBranch.Initialize(branch, GenerateRandomResult());
                 interactiveBranches.Add(interactiveBranch);
             });
         }
 
-
         private string GenerateRandomResult()
         {
             return UnityEngine.Random.Range(1, 101).ToString();
         }
-    }
 
-    public class InteractiveBranch : XRGrabInteractable
-    {
-        public TreeBranch TreeBranch { get; private set; }
-        public string Result { get; set; }
-
-        public void Initialize(TreeBranch treeBranch, string result)
+        public void DeleteBranch(InteractiveBranch branch)
         {
-            TreeBranch = treeBranch;
-            Result = result;
+            interactiveBranches.Remove(branch);
+            Destroy(branch.gameObject);
         }
 
         protected override void OnSelectEntered(SelectEnterEventArgs args)
         {
             base.OnSelectEntered(args);
-            Debug.Log($"Branch Selected. Result: {Result}");
-            // Add visual feedback for selection
+            // Add any custom behavior when the tree is grabbed
         }
 
         protected override void OnSelectExited(SelectExitEventArgs args)
         {
             base.OnSelectExited(args);
-            Debug.Log("Branch Released");
-            // Remove visual feedback for selection
-        }
-
-        public void Delete()
-        {
-            var tree = GetComponentInParent<ProceduralTree>();
-            if (tree != null)
-            {
-                tree.DeleteBranch(this);
-            }
+            // Add any custom behavior when the tree is released
         }
 
         protected override void OnActivated(ActivateEventArgs args)
         {
             base.OnActivated(args);
-            Delete();
+            RegenerateMesh();
         }
     }
 
@@ -265,6 +237,27 @@ namespace ProceduralModeling
         }
     }
 
+    public class InteractiveBranch : XRGrabInteractable
+    {
+        public TreeBranch TreeBranch { get; private set; }
+        public string Result { get; set; }
+
+        public void Initialize(TreeBranch treeBranch, string result)
+        {
+            TreeBranch = treeBranch;
+            Result = result;
+        }
+
+        protected override void OnSelectEntered(SelectEnterEventArgs args)
+        {
+            base.OnSelectEntered(args);
+            // Display the result when grabbed
+            Debug.Log($"Branch Result: {Result}");
+        }
+
+
+    }
+
     public class TreeBranch
     {
         public int Generation { get { return generation; } }
@@ -275,6 +268,8 @@ namespace ProceduralModeling
         public Vector3 To { get { return to; } }
         public float Length { get { return length; } }
         public float Offset { get { return offset; } }
+
+        public float growthFactor = 0;
 
         int generation;
 
@@ -374,6 +369,7 @@ namespace ProceduralModeling
 
             var length = (to - from).magnitude;
             var bend = length * (normal * data.GetRandomBendDegree() + binormal * data.GetRandomBendDegree());
+
             points.Add(from);
             points.Add(Vector3.Lerp(from, to, 0.25f) + bend);
             points.Add(Vector3.Lerp(from, to, 0.75f) + bend);
@@ -389,12 +385,14 @@ namespace ProceduralModeling
 
                 var position = curve.GetPointAt(u);
                 var segment = new TreeSegment(frames[i], position, radius);
+
                 segments.Add(segment);
             }
             return segments;
         }
 
     }
+
 
     public class TreeSegment
     {

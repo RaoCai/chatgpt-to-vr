@@ -8,7 +8,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class VRSearchUI : MonoBehaviour
 {
 
-    public TextMeshProUGUI searchText;
+    public TMP_InputField searchText;
     public TreeVisualiser treeVisualiser;
     private TreeNode currentNode;
     public XRRayInteractor rayInteractor;

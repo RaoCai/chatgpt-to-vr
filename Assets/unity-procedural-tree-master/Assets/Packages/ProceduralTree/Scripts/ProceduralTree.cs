@@ -3,8 +3,10 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using UnityEngine.UI;
 using UnityEngine;
-using UnityEngine.XR.Interaction.Toolkit;
+//using UnityEngine.XR.Interaction.Toolkit;
+using Oculus.Interaction;
 
 namespace ProceduralModeling
 {
@@ -168,6 +170,13 @@ namespace ProceduralModeling
 
                 var interactiveBranch = branchObject.AddComponent<InteractiveBranch>();
                 interactiveBranch.Initialize(branch, GenerateRandomResult());
+
+                var grabbable = branchObject.AddComponent<OVRGrabbable>();
+                var sphereCollider = branchObject.AddComponent<SphereCollider>();
+                
+                var grabPointsField = typeof(OVRGrabbable).GetField("m_grabPoints", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                grabPointsField.SetValue(grabbable, new Collider[] { sphereCollider });
+
                 interactiveBranches.Add(interactiveBranch);
             });
         }
@@ -179,44 +188,102 @@ namespace ProceduralModeling
         }
     }
 
-    public class InteractiveBranch : XRGrabInteractable
+    public class InteractiveBranch : OVRGrabbable
     {
         public TreeBranch TreeBranch { get; private set; }
         public string Result { get; set; }
+        private GameObject popupUI;
 
         public void Initialize(TreeBranch treeBranch, string result)
         {
             TreeBranch = treeBranch;
             Result = result;
+
+            CreatePopupUI();
         }
 
-        protected override void OnSelectEntered(SelectEnterEventArgs args)
-        {
-            base.OnSelectEntered(args);
+        protected override void Start(){
+            base.Start();
+        }
+
+        private void CreatePopupUI(){
+            // Create a UI canvas for the branch
+            popupUI = new GameObject("BranchPopup");
+            GameObject buttonObj = new GameObject("DeleteButton");
+    
+            popupUI.transform.SetParent(transform);
+            buttonObj.transform.SetParent(popupUI.transform);
+
+            popupUI.transform.localPosition = Vector3.up * 0.2f;
+
+            Canvas canvas = popupUI.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.WorldSpace;
+            canvas.worldCamera = Camera.main;
+
+            Button deleteButton = buttonObj.AddComponent<Button>();
+            Image buttonImage = buttonObj.AddComponent<Image>();
+            buttonImage.color = Color.red;
+
+            RectTransform rectTransform = canvas.GetComponent<RectTransform>();
+            rectTransform.sizeDelta = new Vector2(0.2f, 0.1f);
+
+            Image background = popupUI.AddComponent<Image>();
+            background.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+
+            GameObject textObj = new GameObject("ResultText");
+            textObj.transform.SetParent(popupUI.transform);
+
+            // Delete button
+            Text buttonText = new GameObject("ButtonText").AddComponent<Text>();
+            buttonText.transform.SetParent(deleteButton.transform);
+            buttonText.text = "Delete Branch";
+            buttonText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            buttonText.alignment = TextAnchor.MiddleCenter;
+            buttonText.color = Color.white;
+
+            RectTransform buttonRectTransform = deleteButton.GetComponent<RectTransform>();
+            buttonRectTransform.anchorMin = new Vector2(0.5f, 0);
+            buttonRectTransform.anchorMax = new Vector2(0.5f, 0);
+            buttonRectTransform.anchoredPosition = new Vector2(0, 10);
+            buttonRectTransform.sizeDelta = new Vector2(80, 30);
+            
+            // Result text
+            Text resultText = textObj.AddComponent<Text>();
+            resultText.text = $"Result: {Result}";
+            resultText.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            resultText.alignment = TextAnchor.MiddleCenter;
+            resultText.color = Color.white;
+
+            RectTransform textRectTransform = resultText.GetComponent<RectTransform>();
+            textRectTransform.anchorMin = Vector2.zero;
+            textRectTransform.anchorMax = Vector2.one;
+            textRectTransform.offsetMin = Vector2.zero;
+
+            deleteButton.onClick.AddListener(DeleteBranch);
+            popupUI.SetActive(false);
+        }
+
+        public override void GrabBegin(OVRGrabber hand, Collider grabPoint){
+            base.GrabBegin(hand, grabPoint);
             Debug.Log($"Branch Selected. Result: {Result}");
-            // Add visual feedback for selection
+            popupUI.SetActive(true);
         }
 
-        protected override void OnSelectExited(SelectExitEventArgs args)
-        {
-            base.OnSelectExited(args);
+        public override void GrabEnd(Vector3 linearVelocity, Vector3 angularVelocity){
+            base.GrabEnd(linearVelocity, angularVelocity);
             Debug.Log("Branch Released");
-            // Remove visual feedback for selection
+            popupUI.SetActive(false);
         }
 
-        public void Delete()
-        {
+        public void DeleteBranch(){
             var tree = GetComponentInParent<ProceduralTree>();
-            if (tree != null)
-            {
+            if(tree != null){
                 tree.DeleteBranch(this);
             }
         }
 
-        protected override void OnActivated(ActivateEventArgs args)
-        {
-            base.OnActivated(args);
-            Delete();
+        public void Activate(){
+            DeleteBranch();
         }
     }
 

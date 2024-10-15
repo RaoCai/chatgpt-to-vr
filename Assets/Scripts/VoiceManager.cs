@@ -10,7 +10,8 @@ public class VoiceManager : MonoBehaviour
     [Header("Wit Configuration")]
     [SerializeField] private AppVoiceExperience appVoiceExperience;
     [SerializeField] private WitResponseMatcher responseMatcher;
-    [SerializeField] private TextMeshProUGUI transcriptionText;
+    [SerializeField] private TextMeshProUGUI transcriptionText;  // To display the transcription
+    [SerializeField] private TMP_InputField inputField;  // Reference to the InputField for Gemini
 
     [Header("Voice Events")]
     [SerializeField] private UnityEvent wakeWordDetected;
@@ -20,7 +21,6 @@ public class VoiceManager : MonoBehaviour
 
     private void Awake()
     {
-
         if (appVoiceExperience != null && appVoiceExperience.VoiceEvents != null)
         {
             // register listeners for voice events
@@ -43,7 +43,6 @@ public class VoiceManager : MonoBehaviour
         }
     }
 
-
     private void WakeWordDetected(string[] args)
     {
         _voiceCommandReady = true;
@@ -61,6 +60,9 @@ public class VoiceManager : MonoBehaviour
         if (!_voiceCommandReady) return;
         _voiceCommandReady = false;
         completeTranscription?.Invoke(transcription);
+
+        // Send the transcribed text to the InputField
+        inputField.text = transcription;
     }
 
     private void ReactivateVoice()

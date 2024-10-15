@@ -25,32 +25,7 @@ namespace ProceduralModeling {
 		Quaternion rotation;
 
 		void Update () {
-			var mouse = Input.mousePosition;
-			var ray = cam.ScreenPointToRay(mouse);
-			RaycastHit info;
-			hit = col.Raycast(ray, out info, float.MaxValue);
-			if(hit) {
-				point = info.point;
-				var t = info.triangleIndex * 3;
-				var a = triangles[t];
-				var b = triangles[t + 1];
-				var c = triangles[t + 2];
-				var va = vertices[a];
-				var vb = vertices[b];
-				var vc = vertices[c];
-				normal = transform.TransformDirection(Vector3.Cross(vb - va, vc - va));
-				rotation = Quaternion.LookRotation(normal);
-			}
-
-			if(Input.GetMouseButtonUp(0) && hit) {
-				var go = Instantiate(prefabs[Random.Range(0, prefabs.Count)]) as GameObject;
-				go.transform.position = point;
-				go.transform.localScale = Vector3.one * Random.Range(scaleRange.x, scaleRange.y);
-				go.transform.localRotation = Quaternion.AngleAxis(Random.Range(0f, 360f), Vector3.up);
-
-				var tree = go.GetComponent<ProceduralTree>();
-				tree.Data.randomSeed = Random.Range(0, 300);
-			}
+			
 
 		}
 

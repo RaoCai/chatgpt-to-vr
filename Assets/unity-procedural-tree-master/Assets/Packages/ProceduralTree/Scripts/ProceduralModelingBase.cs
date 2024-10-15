@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ProceduralModeling {
+namespace ProceduralModeling
+{
 
-	[RequireComponent (typeof(MeshFilter), typeof(MeshRenderer))]
+    [RequireComponent (typeof(MeshFilter), typeof(MeshRenderer))]
 	[ExecuteInEditMode]
 	public abstract class ProceduralModelingBase : MonoBehaviour {
 
@@ -35,7 +36,6 @@ namespace ProceduralModeling {
 		}
 
 		protected abstract Mesh Build();
-
 	}
 		
 }

@@ -4,6 +4,7 @@ using UnityEngine.Networking;
 using TMPro;  // For TextMeshPro
 using UnityEngine.UI;  // For InputField and Button
 using System.Collections.Generic;
+using System.Linq;  // For LINQ operations
 
 [System.Serializable]
 public class UnityAndGeminiKey
@@ -37,13 +38,20 @@ public class Part
 
 public class GeminiManager : MonoBehaviour
 {
-    public TextAsset jsonApi;  //store API key
-    public TextMeshProUGUI textDisplay;  //display responses
-    public TMP_InputField inputField;  //store user input
-    public Button sendButton;  //send the question
+    public TextAsset jsonApi;  // Store API key
+    public TextMeshProUGUI textDisplay;  // Display responses
+    public TMP_InputField inputField;  // Store user input
+    public Button sendButton;  // Send the question
+    public GameObject userMessagePrefab;  
+    public GameObject aiMessagePrefab;  
+    public Transform logContent; //the container to store the messagebubble
+    public GameObject messageDetailWindow;
+    public TextMeshProUGUI messageDetailText;
+    public Button closeDetailButton;
+
     private string apiKey = "";
     private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
-    private List<string> conversationHistory = new List<string>();  //store conversation history
+    private List<string> conversationHistory = new List<string>();  // Store conversation history
 
     void Start()
     {
@@ -51,15 +59,17 @@ public class GeminiManager : MonoBehaviour
         UnityAndGeminiKey jsonApiKey = JsonUtility.FromJson<UnityAndGeminiKey>(jsonApi.text);
         apiKey = jsonApiKey.key;
 
-        sendButton.onClick.AddListener(OnSendButtonClick);  // Add listener for button click
+        sendButton.onClick.AddListener(OnSendButtonClick); // Add listener for button click
+        closeDetailButton.onClick.AddListener(CloseMessageDetail);
     }
+
 
     public void AskGemini(string userInput)
     {
         // Restrict the response length
         string finalPrompt = "Atention, Please limit your response in 50 words or fewer." + userInput;
-        StartCoroutine(SendRequestToGemini(finalPrompt));
         inputField.text = "";
+        StartCoroutine(SendRequestToGemini(finalPrompt));
     }
 
     // Method triggered when user clicks the send button
@@ -68,20 +78,76 @@ public class GeminiManager : MonoBehaviour
         string userInput = inputField.text;  // read the user inputfield
         if (!string.IsNullOrEmpty(userInput))
         {
-            string finalPrompt = "Atention, Please limit your response in 50 words or fewer." + userInput;
-            StartCoroutine(SendRequestToGemini(finalPrompt));
-            inputField.text = "";  // clear the inputfield
+            AskGemini(userInput);
+            DisplayMessageBubble(userInput, true);
         }
     }
 
-    // communicate with the gemini
+    // display the bubble extracted content
+    public void DisplayMessageBubble(string fullText, bool isUserMessage)
+    {
+        // loading different prefab by different source
+        GameObject messageBubblePrefab;
+        if (isUserMessage)
+        {
+            messageBubblePrefab = userMessagePrefab;
+        }
+        else
+        {
+            messageBubblePrefab = aiMessagePrefab;
+        }
+
+        GameObject messageBubble = Instantiate(messageBubblePrefab, logContent);
+        TextMeshProUGUI messageText = messageBubble.GetComponentInChildren<TextMeshProUGUI>();
+
+        // split the text into words
+        string[] words = fullText.Split(' ');
+        string truncatedText = string.Join(" ", words.Take(10));
+
+        if (words.Length > 10)
+        {
+            truncatedText += "..."; 
+        }
+
+
+        messageText.text = truncatedText;
+
+        // display the complete content when clicking bubble
+        Button messageButton = messageBubble.GetComponentInChildren<Button>();
+        if (messageButton != null)
+        {
+            Debug.Log("bubble button exist");
+            messageButton.onClick.AddListener(() => {
+                Debug.Log("message bubble clicked");
+                ShowFullMessage(fullText);
+            });
+        }
+        else
+        {
+            Debug.LogWarning("bubble button not exist");
+        }
+    }
+
+
+    public void ShowFullMessage(string fullText)
+    {
+        Debug.Log("full message: " + fullText);
+        messageDetailText.text = fullText;
+        messageDetailWindow.SetActive(true);
+    }
+
+    public void CloseMessageDetail()
+    {
+        messageDetailWindow.SetActive(false);
+    }
+
+
     public IEnumerator SendRequestToGemini(string promptText)
     {
         // conversation context with previous messages
         conversationHistory.Add(promptText);
 
         string conversationContext = string.Join(" ", conversationHistory);
-
         string url = $"{apiEndpoint}?key={apiKey}";
         string jsonData = "{\"contents\": [{\"parts\": [{\"text\": \"{" + conversationContext + "}\"}]}]}";
 
@@ -108,11 +174,10 @@ public class GeminiManager : MonoBehaviour
                     string text = response.candidates[0].content.parts[0].text;
                     Debug.Log(text);
 
+                    DisplayMessageBubble(text, false);
+
                     // Add Gemini's response to conversation history
                     conversationHistory.Add(text);
-
-                    // Display Gemini's response in TextMeshPro
-                    textDisplay.text = text;
                 }
                 else
                 {

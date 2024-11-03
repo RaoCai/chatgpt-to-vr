@@ -269,6 +269,7 @@ public class GeminiManager : MonoBehaviour
 
             for (int i = 0; i < points.Count; i++)
             {
+
                 Message message = new Message
                 {
                     content = points[i],
@@ -419,7 +420,14 @@ public class GeminiManager : MonoBehaviour
     }
 
     // close the detail window
-    private void CloseMessageDetail()
+    private void CloseMessageDetail(Message message)
+    {
+        Debug.Log("close window.");
+        message.isSelected = !message.isSelected;
+        messageDetailWindow.SetActive(false);
+    }
+
+    private void CloseMessageDetail()  
     {
         Debug.Log("close window.");
         messageDetailWindow.SetActive(false);
@@ -457,8 +465,7 @@ public class GeminiManager : MonoBehaviour
 
         isFollowup = true; 
         StartCoroutine(SendRequestToGemini(message.content, true));
-
-        CloseMessageDetail();
+        CloseMessageDetail(message);
     }
 
 
@@ -517,4 +524,5 @@ public class GeminiManager : MonoBehaviour
 
         currentVertical = newVerticalPosition;
     }
+
 }

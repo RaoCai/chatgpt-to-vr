@@ -8613,7 +8613,7 @@ MonoBehaviour:
   messageDetailWindow: {fileID: 1727087616}
   messageDetailText: {fileID: 640288413}
   closeDetailButton: {fileID: 488643372}
-  deleteButton: {fileID: 2045232131}
+  pruneButton: {fileID: 2045232131}
   TellMeMoreButton: {fileID: 646533924}
 --- !u!4 &1679244860
 Transform:
@@ -8647,7 +8647,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1727087617
 RectTransform:
   m_ObjectHideFlags: 0

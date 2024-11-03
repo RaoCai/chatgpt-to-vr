@@ -83,6 +83,7 @@ public class GeminiManager : MonoBehaviour
     public GameObject messageDetailWindow;
     public TextMeshProUGUI messageDetailText;
     public Button closeDetailButton;
+    public Button pruneButton;
 
     private string apiKey = ""; // Load from the json file
     private string apiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
@@ -125,7 +126,14 @@ public class GeminiManager : MonoBehaviour
             TellMeMoreButton.onClick.AddListener(() => OnTMMClick(currentSelectedMessage));
         }
 
-
+        if (pruneButton == null)
+        {
+            Debug.LogError("prune is null");
+        }
+        else
+        {
+            pruneButton.onClick.AddListener(() => OnPruneButtonClick(currentSelectedMessage));
+        }
 
         scrollRect = logContent.GetComponentInParent<ScrollRect>();// get scrollrect component for the message log
 
@@ -451,5 +459,62 @@ public class GeminiManager : MonoBehaviour
         StartCoroutine(SendRequestToGemini(message.content, true));
 
         CloseMessageDetail();
+    }
+
+
+    private void OnPruneButtonClick(Message messageToDelete)
+    {
+        if (messageToDelete == null)
+        {
+            Debug.LogWarning("no bubble selected to delete");
+            return;
+        }
+
+        Debug.Log($"deleting message: {messageToDelete.content}");
+
+        // find the list and delete the bubble or whole list
+        List<Message> messageGroup = messageLists.Find(group => group.Contains(messageToDelete));
+        if (messageGroup != null)
+        {
+            if (messageGroup.Count == 1)
+            {
+                messageLists.Remove(messageGroup);
+            }
+            else
+            {
+                messageGroup.Remove(messageToDelete);
+
+                float startX = -(messageGroup.Count - 1) * Horizontal / 2f;
+                for (int i = 0; i < messageGroup.Count; i++)
+                {
+                    RectTransform bubbleRect = messageGroup[i].bubbleObject.GetComponent<RectTransform>();
+                    bubbleRect.anchoredPosition = new Vector2(startX + (i * Horizontal), messageGroup[i].verticalPosition);
+                }
+            }
+            Destroy(messageToDelete.bubbleObject);
+
+            RecalculatePosition();
+            UpdateScrollViewContentSize();
+        }
+        CloseMessageDetail();
+    }
+
+    private void RecalculatePosition()
+    {
+        float newVerticalPosition = -InitialY;
+
+        foreach (var messageGroup in messageLists)
+        {
+            foreach (var message in messageGroup)
+            {
+                message.verticalPosition = newVerticalPosition;
+                RectTransform bubbleRect = message.bubbleObject.GetComponent<RectTransform>();
+                Vector2 currentPos = bubbleRect.anchoredPosition;
+                bubbleRect.anchoredPosition = new Vector2(currentPos.x, newVerticalPosition);
+            }
+            newVerticalPosition -= Vertical;
+        }
+
+        currentVertical = newVerticalPosition;
     }
 }

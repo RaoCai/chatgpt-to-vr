@@ -8,9 +8,9 @@ Users can enter questions by voice or text, and Gemini will respond according to
 The response content is arranged in a 2D tree diagram in the form of message bubbles, accompanied by a 3D tree that intuitively reflects the complexity of the query. 
 Users can click on the message node to view details and perform further operations, such as obtaining extended information or pruning specific nodes.
 
-![Demo of Feature](./virtual hands and keyboard.gif)
+![gif](./virtual hands and keyboard.gif)
 
-![Demo of Feature](./controller and keyboard.gif)   
+![gif](./controller and keyboard.gif)   
 
 [![Watch the demo video](https://img.youtube.com/vi/https://youtu.be/JurEAHQtJTI/0.jpg)](https://www.youtube.com/watch?v=https://youtu.be/JurEAHQtJTI)
 
@@ -19,7 +19,6 @@ Users can click on the message node to view details and perform further operatio
 ## Catalog
 - [Features](#Features)
 - [Install](#Install)
-- [How to use](#How to use)
 - [Contribution](#Contribution)
 
 ---
